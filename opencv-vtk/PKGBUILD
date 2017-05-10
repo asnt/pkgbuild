@@ -6,12 +6,12 @@
 pkgbase=opencv
 pkgname=('opencv-vtk' 'opencv-vtk-samples')
 pkgver=3.2.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Open Source Computer Vision Library"
 arch=('i686' 'x86_64')
 license=('BSD')
 url="http://opencv.org/"
-depends=('intel-tbb' 'openexr' 'xine-lib' 'libdc1394' 'gtkglext' 'vtk6')
+depends=('intel-tbb' 'openexr' 'xine-lib' 'libdc1394' 'gtkglext' 'vtk')
 makedepends=('cmake' 'python-numpy' 'python2-numpy' 'mesa' 'eigen')
 optdepends=('opencv-vtk-samples'
             'eigen'
@@ -57,10 +57,7 @@ _cmakeopts=('-D WITH_OPENCL=ON'
 build() {
   cd "$srcdir/$pkgbase-$pkgver"
 
-  export VTK_DIR="/opt/vtk6"
-
   cmake ${_cmakeopts[@]} \
-    -DVTK_DIR="/opt/vtk6/" \
     -DOPENCV_EXTRA_MODULES_PATH="$srcdir/opencv_contrib-$pkgver/modules" \
     .
 

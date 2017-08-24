@@ -5,8 +5,8 @@
 
 pkgbase=opencv
 pkgname=('opencv-vtk' 'opencv-vtk-samples')
-pkgver=3.2.0
-pkgrel=4
+pkgver=3.3.0
+pkgrel=1
 pkgdesc="Open Source Computer Vision Library"
 arch=('i686' 'x86_64')
 license=('BSD')
@@ -14,15 +14,14 @@ url="http://opencv.org/"
 depends=('intel-tbb' 'openexr' 'xine-lib' 'libdc1394' 'libwebp' 'gtkglext' 'vtk')
 makedepends=('cmake' 'python-numpy' 'python2-numpy' 'mesa' 'eigen')
 optdepends=('opencv-vtk-samples'
-            'eigen'
             'opencl-icd-loader: For coding with OpenCL'
             'python-numpy: Python 3 interface'
             'python2-numpy: Python 2 interface')
-provides=('opencv' 'opencv-samples')
+provides=('opencv')
 source=("$pkgbase-$pkgver.tar.gz::https://github.com/Itseez/opencv/archive/$pkgver.zip"
         "opencv_contrib-$pkgver.tar.gz::https://github.com/Itseez/opencv_contrib/archive/$pkgver.tar.gz")
-md5sums=('bfc6a261eb069b709bcfe7e363ef5899'
-         'd7d50c70c31df3b31310f548f31fd2a2')
+md5sums=('cc586ebe960a7cdd87100e89088abc06'
+         '7878ff39d3488b335861831419d30c64')
 
 _cmakeopts=('-D WITH_OPENCL=ON'
             '-D WITH_OPENGL=ON'
@@ -46,6 +45,8 @@ _cmakeopts=('-D WITH_OPENCL=ON'
             #'-D WITH_IPP=ON'
             #'-D INSTALL_CREATE_DISTRIB=ON'
             '-D ENABLE_PRECOMPILED_HEADERS=OFF'
+            '-D ENABLE_CXX11=ON'
+            '-Wno-dev'
             )
 
 # SSE only available from Pentium 3 onwards (i686 is way older)
@@ -55,11 +56,13 @@ _cmakeopts=('-D WITH_OPENCL=ON'
                '-D ENABLE_SSE3=OFF')
 
 build() {
-  cd "$srcdir/$pkgbase-$pkgver"
+  builddir="$srcdir/../build"
+  mkdir -p "$builddir"
+  cd "$builddir"
 
   cmake ${_cmakeopts[@]} \
     -DOPENCV_EXTRA_MODULES_PATH="$srcdir/opencv_contrib-$pkgver/modules" \
-    .
+    "$srcdir/$pkgbase-$pkgver"
 
   make -j9
 }
@@ -67,36 +70,31 @@ build() {
 package_opencv-vtk() {
   options=('staticlibs')
 
-  cd "$srcdir/$pkgbase-$pkgver"
+  cd "$srcdir/../build"
 
   make DESTDIR="$pkgdir" install
 
   # install license file
   install -Dm644 "$srcdir/$pkgbase-$pkgver/LICENSE" \
-    "$pkgdir/usr/share/licenses/$pkgbase/LICENSE"
+    "$pkgdir/usr/share/licenses/OpenCV/LICENSE"
 
   cd "$pkgdir/usr/share"
 
   # separate samples package; also be -R friendly
   if [[ -d OpenCV/samples ]]; then
+    [[ -d "$srcdir/$pkgbase-samples" ]] && rm -r "$srcdir/$pkgbase-samples"
     mv OpenCV/samples "$srcdir/$pkgbase-samples"
-    mv OpenCV $pkgbase # otherwise folder naming is inconsistent
-  elif [[ ! -d OpenCV ]]; then
-    warning "Directory naming issue; samples package may not be built!"
   fi
 }
 
 package_opencv-vtk-samples() {
   pkgdesc+=" (samples)"
-  depends=("opencv=$pkgver") # sample codes change with lib/API
+  provides=('opencv-samples')
+  depends=("opencv-vtk=$pkgver") # sample codes change with lib/API
   unset optdepends
 
-  mkdir -p "$pkgdir/usr/share/opencv"
-  cp -r "$srcdir/opencv-samples" "$pkgdir/usr/share/opencv/samples"
-
-  # install license file
-  install -Dm644 "$srcdir/opencv-$pkgver/LICENSE" \
-    "$pkgdir/usr/share/licenses/$pkgbase/LICENSE"
+  mkdir -p "$pkgdir/usr/share/OpenCV"
+  cp -r "$srcdir/$pkgbase-samples" "$pkgdir/usr/share/OpenCV/samples"
 }
 
 # vim:set ts=2 sw=2 et:

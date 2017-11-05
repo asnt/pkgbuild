@@ -6,9 +6,9 @@
 pkgbase=opencv
 pkgname=('opencv-vtk' 'opencv-vtk-samples')
 pkgver=3.3.0
-pkgrel=1
+pkgrel=2
 pkgdesc="Open Source Computer Vision Library"
-arch=('i686' 'x86_64')
+arch=('x86_64')
 license=('BSD')
 url="http://opencv.org/"
 depends=('intel-tbb' 'openexr' 'xine-lib' 'libdc1394' 'libwebp' 'gtkglext' 'vtk')
@@ -46,14 +46,9 @@ _cmakeopts=('-D WITH_OPENCL=ON'
             #'-D INSTALL_CREATE_DISTRIB=ON'
             '-D ENABLE_PRECOMPILED_HEADERS=OFF'
             '-D ENABLE_CXX11=ON'
+            '-DOPENCV_EXTRA_MODULES_PATH="${srcdir}/opencv_contrib-${pkgver}/modules"'
             '-Wno-dev'
             )
-
-# SSE only available from Pentium 3 onwards (i686 is way older)
-[[ "$CARCH" = 'i686' ]] && \
-  _cmakeopts+=('-D ENABLE_SSE=OFF'
-               '-D ENABLE_SSE2=OFF'
-               '-D ENABLE_SSE3=OFF')
 
 build() {
   builddir="$srcdir/../build"
@@ -61,7 +56,6 @@ build() {
   cd "$builddir"
 
   cmake ${_cmakeopts[@]} \
-    -DOPENCV_EXTRA_MODULES_PATH="$srcdir/opencv_contrib-$pkgver/modules" \
     "$srcdir/$pkgbase-$pkgver"
 
   make -j9

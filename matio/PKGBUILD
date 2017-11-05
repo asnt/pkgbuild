@@ -1,0 +1,32 @@
+# $Id$
+# Maintainer: asnt
+
+pkgbase=matio
+pkgname=('matio')
+pkgver=1.5.11
+pkgrel=1
+pkgdesc="A C library for reading and writing MATLAB MAT files"
+arch=('x86_64')
+license=('BSD')
+url="https://sourceforge.net/projects/matio/"
+depends=()
+makedepends=('make')
+optdepends=()
+provides=('matio')
+source=("$pkgbase-$pkgver.tar.gz::https://sourceforge.net/projects/matio/files/matio/$pkgver/matio-$pkgver.tar.gz/download")
+md5sums=('a79cf9d1200f37e0466062c3ce396d6b')
+
+build() {
+  cd "$srcdir/$pkgbase-$pkgver"
+  ./configure --prefix=/usr
+  make -j$(nproc)
+}
+
+package() {
+  cd "$srcdir/$pkgbase-$pkgver"
+  make DESTDIR="$pkgdir" install
+  install -Dm644 "$srcdir/$pkgbase-$pkgver/COPYING" \
+    "$pkgdir/usr/share/licenses/$pkgbase/LICENSE"
+}
+
+# vim:set ts=2 sw=2 et:

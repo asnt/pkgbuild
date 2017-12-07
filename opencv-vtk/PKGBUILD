@@ -6,7 +6,7 @@
 pkgbase=opencv
 pkgname=('opencv-vtk' 'opencv-vtk-samples')
 pkgver=3.3.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Open Source Computer Vision Library"
 arch=('x86_64')
 license=('BSD')
@@ -46,7 +46,7 @@ _cmakeopts=('-D WITH_OPENCL=ON'
             #'-D INSTALL_CREATE_DISTRIB=ON'
             '-D ENABLE_PRECOMPILED_HEADERS=OFF'
             '-D ENABLE_CXX11=ON'
-            '-DOPENCV_EXTRA_MODULES_PATH="${srcdir}/opencv_contrib-${pkgver}/modules"'
+            '-D BUILD_opencv_dnn_modern=OFF'
             '-Wno-dev'
             )
 
@@ -56,6 +56,7 @@ build() {
   cd "$builddir"
 
   cmake ${_cmakeopts[@]} \
+    -DOPENCV_EXTRA_MODULES_PATH=$srcdir/opencv_contrib-$pkgver/modules \
     "$srcdir/$pkgbase-$pkgver"
 
   make -j9
